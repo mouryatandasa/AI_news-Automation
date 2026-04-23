@@ -14,4 +14,4 @@ Automated workflow built using n8n.
 - Telegram Bot API
 
 ## Import Workflow
-Use workflow.json inside workflows folder.
+Use newsflow.json inside workflows folder.

@@ -1,0 +1,114 @@
+{
+  "name": "AI Digest Groq Gmail",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Daily Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200,300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "AI RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [430,300],
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=AI"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680,300],
+      "parameters": {
+        "jsCode": "const news = items.slice(0,10).map((item,i)=>`${i+1}. ${item.json.title}`).join('\\n'); return [{json:{prompt:`Summarize these AI news headlines into top 5 concise bullet points:\\n\\n${news}`}}];"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Groq Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [950,300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "specifyHeaders": "usingFields",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "{ \"model\": \"llama3-8b-8192\", \"messages\": [ { \"role\": \"user\", \"content\": \"{{$json.prompt}}\" } ] }"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Send Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1220,300],
+      "parameters": {
+        "operation": "send",
+        "to": "YOUR_EMAIL@gmail.com",
+        "subject": "🚀 AI Daily Digest",
+        "message": "={{$json.choices[0].message.content}}"
+      }
+    }
+  ],
+  "connections": {
+    "Daily Trigger": {
+      "main": [
+        [
+          { "node": "AI RSS", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "AI RSS": {
+      "main": [
+        [
+          { "node": "Build Prompt", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          { "node": "Groq Summary", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Groq Summary": {
+      "main": [
+        [
+          { "node": "Send Gmail", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  }
+}

@@ -1,17 +1,33 @@
-# AI News Automation
+# AI_news Automation
 
-Automated workflow built using n8n.
+An automated AI news summarization workflow built with n8n.
 
 ## Features
-- Fetch AI news
-- Summarize with OpenAI
-- Send Telegram alerts
-- Daily automation
+- Runs daily at 9:00 AM
+- Fetches latest AI news from Google News RSS
+- Summarizes top headlines using Groq LLM
+- Sends digest to Gmail automatically
 
 ## Stack
 - n8n
-- OpenAI API
-- Telegram Bot API
+- Groq API
+- Gmail API
+- RSS Feed
 
-## Import Workflow
-Use newsflow.json inside workflows folder.
+## Workflow Steps
+Schedule Trigger -> RSS Feed -> Build Prompt -> Groq Summary -> Gmail Send
+
+## Model Used
+llama3-8b-8192
+
+## Setup
+1. Import newsflow.JSON into n8n
+2. Add Groq API key
+3. Connect Gmail credentials
+4. Activate workflow
+
+## Use Cases
+- Daily AI learning
+- Productivity digest
+- Founder/researcher updates
+- Email automation
